@@ -95,6 +95,16 @@ class DB {
             print $e;
         }
     }
+
+    function delete($query, $queryParameters = []) {
+        try {
+            $sql = $this->pdo->prepare($query);
+            $sql->execute($queryParameters);
+        }
+        catch(PDOException $e) {
+            print $e;
+        }
+    }
 }
 
 ?>
