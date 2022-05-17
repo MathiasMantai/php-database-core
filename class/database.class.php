@@ -45,15 +45,14 @@ class DB {
         }
     }
 
-    function select($query, $mode) {
+    function select($query, $mode, $bindArray) {
         $sql = $this->pdo->prepare($query);
-        $sql->execute();
+        $sql->execute($bindArray);
         switch($mode) {
             case 'fetchRow':
                 return $sql->fetch();
             case 'fetchAll':
                 return $sql->fetchAll(PDO::FETCH_ASSOC);
-
         }
     }
 
@@ -62,7 +61,7 @@ class DB {
         $query = 'INSERT INTO '.$table.' ';
         $query .= '( ';
         for($i = 0; $i < count($columns); $i++) {
-            $query .= $columns[$i];
+            $query .= '?';
             if($i < count($columns)-1) {
                 $query .= ', ';
             }
@@ -79,7 +78,7 @@ class DB {
         // var_dump($this->pdo);
         try {
             $sql = $this->pdo->prepare($query);
-            $sql->execute();
+            $sql->execute($values);
         }
         catch(PDOException $e) {
             print $e;
