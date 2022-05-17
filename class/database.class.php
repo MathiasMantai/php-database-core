@@ -1,8 +1,10 @@
 <?php
+include './errorlog.class.php';
 
 class DB {
 
     private $pdo;
+    private $errorLog;
 
     function __construct() {
         try {
@@ -12,6 +14,7 @@ class DB {
         catch(PDOException $e) {
             print $e;
         }
+        $this->errorLog = new ErrorLog();
     }
 
     static function initDB() {
@@ -21,7 +24,7 @@ class DB {
             $sql_tmp->execute();
         }
         catch(PDOException $e) {
-            print $e;
+            $this->errorLog->logError($e->getMessage());
         }
     }
 
@@ -30,7 +33,7 @@ class DB {
     }
 
     static function initTables() {
-        $tableFiles = glob('./src/sql/'.PREFIX.'*.sql');
+        $tableFiles = glob('../src/sql/'.PREFIX.'*.sql');
         try {
             $tmp = new PDO('mysql:dbname='.DATABASE.';host='.DBHOST.';',DBUSER,DBPW);
             for($i = 0; $i < count($tableFiles); $i++) {
@@ -40,7 +43,7 @@ class DB {
             }
         }
         catch(PDOException $e) {
-            print $e;
+            $this->errorLog->logError($e->getMessage());
             die;
         }
     }
@@ -58,6 +61,7 @@ class DB {
 
     function insert($table,$columns, $values) {
         global $PREFIX;
+        $bindParameters = implode(',', array_fill(0, count($values, '?')));
         $query = 'INSERT INTO '.$table.' ';
         $query .= '( ';
         for($i = 0; $i < count($columns); $i++) {
@@ -81,7 +85,7 @@ class DB {
             $sql->execute($values);
         }
         catch(PDOException $e) {
-            print $e;
+            $this->errorLog->logError($e->getMessage());
         }
     }
 
@@ -91,7 +95,7 @@ class DB {
             $sql->execute($queryParameters);
         }
         catch(PDOException $e) {
-            print $e;
+            $this->errorLog->logError($e->getMessage());
         }
     }
 
@@ -101,7 +105,7 @@ class DB {
             $sql->execute($queryParameters);
         }
         catch(PDOException $e) {
-            print $e;
+            $this->errorLog->logError($e->getMessage());
         }
     }
 }
