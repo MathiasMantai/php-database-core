@@ -33,7 +33,7 @@ class DB {
     }
 
     static function initTables() {
-        $tableFiles = glob('../src/sql/'.PREFIX.'*.sql');
+        $tableFiles = glob('../sql/'.PREFIX.'*.sql');
         try {
             $tmp = new PDO('mysql:dbname='.DATABASE.';host='.DBHOST.';',DBUSER,DBPW);
             for($i = 0; $i < count($tableFiles); $i++) {
