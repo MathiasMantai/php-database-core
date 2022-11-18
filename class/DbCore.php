@@ -49,7 +49,7 @@ class DbCore {
             $res = $sql_tmp->execute([$dbName]);
         }
         catch(PDOException $e) {
-            $this->errorLog->logError($e->getMessage());
+            die("Error creating database");
         }
 
         return $res;
@@ -78,8 +78,7 @@ class DbCore {
             }
         }
         catch(PDOException $e) {
-            $this->errorLog->logError($e->getMessage());
-            die;
+            die("Error creating tables");
         }
 
         return $res;
