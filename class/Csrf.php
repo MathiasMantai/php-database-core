@@ -1,4 +1,7 @@
 <?php
+
+namespace DbCore;
+
 //csrf protection class
 class Csrf {
 
@@ -22,4 +25,3 @@ class Csrf {
     }
 }
 
-?>

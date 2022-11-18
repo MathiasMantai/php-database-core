@@ -1,5 +1,7 @@
 <?php
 
+namespace DbCore;
+
 class ErrorLog {
     function __construct() {
 
@@ -12,4 +14,3 @@ class ErrorLog {
     }
 }
 
-?>

@@ -1,7 +1,9 @@
 <?php
-include './errorlog.class.php';
 
-class DB {
+
+namespace DbCore;
+
+class DbCore {
 
     private $pdo;
     private $errorLog;
@@ -110,4 +112,3 @@ class DB {
     }
 }
 
-?>
