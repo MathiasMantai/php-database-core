@@ -7,4 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
+    'DbCore\\Csrf' => $baseDir . '/class/Csrf.php',
+    'DbCore\\DbCore' => $baseDir . '/class/DbCore.php',
+    'DbCore\\ErrorLog' => $baseDir . '/class/ErrorLog.php',
 );

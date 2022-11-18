@@ -2,15 +2,19 @@
 
 
 namespace DbCore;
+use DbCore\ErrorLog;
+use DbCore\Csrf;
+use PDO;
+
 
 class DbCore {
 
     private $pdo;
     private $errorLog;
 
-    function __construct() {
+    function __construct($database, $host, $user, $password) {
         try {
-            $this->pdo = new PDO('mysql:dbname='.DATABASE.';host='.DBHOST.';',DBUSER,DBPW);
+            $this->pdo = new PDO('mysql:dbname='.$database.';host='.$host.';', $user, $password);
             // var_dump($this->pdo);
         }
         catch(PDOException $e) {

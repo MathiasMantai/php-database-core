@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'DatabaseCore\\' => array($baseDir . '/class'),
+    'DbCore\\' => array($baseDir . '/class'),
+    'Config\\' => array($baseDir . '/config'),
 );

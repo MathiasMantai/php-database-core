@@ -4,6 +4,13 @@
     "description": "A simple php query builder",
     "license": "GPL-3.0-or-later",
     "autoload": {
-        "psr-4": {"DatabaseCore\\": "class/"}
+        "psr-4": {
+            "DbCore\\": "class/"
+        }
+    },
+    "require": {
+        "php": ">=5.3.6",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*"
     }
 }

@@ -6,6 +6,10 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 }
 
 
-use DbCore\DB;
+use DbCore\DbCore;
 
-$db = new DB();
+$db = new DbCore("rb_database","localhost", "root", "");
+
+$test = $db->select("SELECT * FROM rb_entries", "fetchAll", []);
+
+var_dump($test);
