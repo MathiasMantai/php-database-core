@@ -26,14 +26,14 @@ class DbCore {
         $this->host = $host;
         $this->user = $user;
         $this->password = $password;
+        $this->errorLog = new ErrorLog();
         try {
             $this->pdo = new PDO('mysql:dbname='.$this->database.';host='.$this->host.';', $this->user, $this->password);
             // var_dump($this->pdo);
         }
         catch(PDOException $e) {
-            print $e;
+            $this->errorLog->logError($e->getMessage()):
         }
-        $this->errorLog = new ErrorLog();
     }
 
 
@@ -45,8 +45,9 @@ class DbCore {
         $res;
         try {
             $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $password);
-            $sql_tmp = $tmpConn->prepare('CREATE DATABASE IF NOT EXISTS ?');
-            $res = $sql_tmp->execute([$dbName]);
+            $dbName = filter_var($dbName);
+            $sql_tmp = $tmpConn->prepare("CREATE DATABASE IF NOT EXISTS $dbName");
+            $res = $sql_tmp->execute();
         }
         catch(PDOException $e) {
             die("Error creating database");
