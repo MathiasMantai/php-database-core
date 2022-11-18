@@ -39,12 +39,12 @@ class DbCore {
 
     /**
      * @param string $dbName
-     * @return boolean
+     * @return bool
      */
-    static function initDB(string $dbName): boolean {
+    static function initDB(string $dbName, string $host, string $user, string $password): bool {
         $res;
         try {
-            $tmpConn = new PDO('mysql:dbname=;host='.$this->host.';', $this->user, $this->password);
+            $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $password);
             $sql_tmp = $tmpConn->prepare('CREATE DATABASE IF NOT EXISTS ?');
             $res = $sql_tmp->execute([$dbName]);
         }
@@ -64,9 +64,9 @@ class DbCore {
 
     /**
      * @param string $dir
-     * @return boolean
+     * @return bool
      */
-    static function initTables(string $dir): boolean  {
+    static function initTables(string $dir): bool  {
         $res;
         $tableFiles = glob($dir . '*.sql');
         try {
@@ -105,9 +105,9 @@ class DbCore {
      * @param string $table
      * @param array $columns
      * @param array $values
-     * @return boolean
+     * @return bool
      */
-    function insert(string $table,array $columns,array $values): boolean {
+    function insert(string $table,array $columns,array $values): bool {
         $res;
         $bindParameters = implode(',', array_fill(0, count($values, '?')));
         $query = 'INSERT INTO '.$table.' ';
@@ -142,9 +142,9 @@ class DbCore {
     /**
      * @param string $query
      * @param array $bindArray
-     * @return boolean
+     * @return bool
      */
-    function update(string $query, array $bindArray = []): boolean {
+    function update(string $query, array $bindArray = []): bool {
         $res;
         try {
             $sql = $this->pdo->prepare($query);
@@ -160,9 +160,9 @@ class DbCore {
     /**
      * @param string $query
      * @param array $bindArray
-     * @return boolean
+     * @return bool
      */
-    function delete($query, $bindArray = []): boolean {
+    function delete($query, $bindArray = []): bool {
         $res;
         try {
             $sql = $this->pdo->prepare($query);
