@@ -32,7 +32,7 @@ class DbCore {
             // var_dump($this->pdo);
         }
         catch(PDOException $e) {
-            $this->errorLog->logError($e->getMessage()):
+            $this->errorLog->logError($e->getMessage());
         }
     }
 
