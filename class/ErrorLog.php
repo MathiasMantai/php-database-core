@@ -9,7 +9,7 @@ class ErrorLog {
     public function logError($errorMessage) {
         $file = fopen('../log/error_log.log', 'a');
         fwrite($file, '\n');
-        fwrite($file, $errorMessage);
+        fwrite($file, date('d-m-Y H:i:s') . " - " . $errorMessage);
         fclose($file);
     }
 }

@@ -9,12 +9,25 @@ use PDO;
 
 class DbCore {
 
-    private $pdo;
-    private $errorLog;
+    private PDO $pdo;
 
-    function __construct($database, $host, $user, $password) {
+    private ErrorLog $errorLog;
+
+    private string $database;
+
+    private string $host;
+
+    private string $user;
+
+    private string $password;
+
+    function __construct(string $database, string $host, string $user, string $password) {
+        $this->database = $database;
+        $this->host = $host;
+        $this->user = $user;
+        $this->password = $password;
         try {
-            $this->pdo = new PDO('mysql:dbname='.$database.';host='.$host.';', $user, $password);
+            $this->pdo = new PDO('mysql:dbname='.$this->database.';host='.$this->host.';', $this->user, $this->password);
             // var_dump($this->pdo);
         }
         catch(PDOException $e) {
@@ -23,38 +36,62 @@ class DbCore {
         $this->errorLog = new ErrorLog();
     }
 
-    static function initDB() {
+
+    /**
+     * @param string $dbName
+     * @return boolean
+     */
+    static function initDB(string $dbName): boolean {
+        $res;
         try {
-            $tmp = new PDO('mysql:dbname=;host='.DBHOST.';',DBUSER,DBPW);
-            $sql_tmp = $tmp->prepare('CREATE DATABASE IF NOT EXISTS rb_database');
-            $sql_tmp->execute();
+            $tmpConn = new PDO('mysql:dbname=;host='.$this->host.';', $this->user, $this->password);
+            $sql_tmp = $tmpConn->prepare('CREATE DATABASE IF NOT EXISTS ?');
+            $res = $sql_tmp->execute([$dbName]);
         }
         catch(PDOException $e) {
             $this->errorLog->logError($e->getMessage());
         }
+
+        return $res;
     }
 
-    function closeConnection() {
+    /**
+     * @return void
+     */
+    function closeConnection(): void {
         $this->pdo = null;
     }
 
-    static function initTables() {
-        $tableFiles = glob('../sql/'.PREFIX.'*.sql');
+    /**
+     * @param string $dir
+     * @return boolean
+     */
+    static function initTables(string $dir): boolean  {
+        $res;
+        $tableFiles = glob($dir . '*.sql');
         try {
-            $tmp = new PDO('mysql:dbname='.DATABASE.';host='.DBHOST.';',DBUSER,DBPW);
+            $tmp = new PDO('mysql:dbname='. $this->database .';host='. $this->host .';', $this->user, $this->password);
             for($i = 0; $i < count($tableFiles); $i++) {
                 $fileData = file_get_contents($tableFiles[$i]);
                 $sql = $tmp->prepare($fileData);
-                $sql->execute();
+                $res = $sql->execute();
             }
         }
         catch(PDOException $e) {
             $this->errorLog->logError($e->getMessage());
             die;
         }
+
+        return $res;
     }
 
-    function select($query, $mode, $bindArray) {
+    /**
+     * @param string $query
+     * @param string $mode
+     * @param array $bindArray
+     * @return mixed
+     */
+    function select(string $query, string $mode, array $bindArray): mixed {
         $sql = $this->pdo->prepare($query);
         $sql->execute($bindArray);
         switch($mode) {
@@ -65,8 +102,14 @@ class DbCore {
         }
     }
 
-    function insert($table,$columns, $values) {
-        global $PREFIX;
+    /**
+     * @param string $table
+     * @param array $columns
+     * @param array $values
+     * @return boolean
+     */
+    function insert(string $table,array $columns,array $values): boolean {
+        $res;
         $bindParameters = implode(',', array_fill(0, count($values, '?')));
         $query = 'INSERT INTO '.$table.' ';
         $query .= '( ';
@@ -93,26 +136,42 @@ class DbCore {
         catch(PDOException $e) {
             $this->errorLog->logError($e->getMessage());
         }
+
+        return $res;
     }
 
-    function update($query, $queryParameters = []) {
+    /**
+     * @param string $query
+     * @param array $bindArray
+     * @return boolean
+     */
+    function update(string $query, array $bindArray = []): boolean {
+        $res;
         try {
             $sql = $this->pdo->prepare($query);
-            $sql->execute($queryParameters);
+            $res = $sql->execute($bindArray);
         }
         catch(PDOException $e) {
             $this->errorLog->logError($e->getMessage());
         }
+
+        return $res;
     }
 
-    function delete($query, $queryParameters = []) {
+    /**
+     * @param string $query
+     * @param array $bindArray
+     * @return boolean
+     */
+    function delete($query, $bindArray = []): boolean {
+        $res;
         try {
             $sql = $this->pdo->prepare($query);
-            $sql->execute($queryParameters);
+            $res = $sql->execute($queryParameters);
         }
         catch(PDOException $e) {
             $this->errorLog->logError($e->getMessage());
         }
+        return $res;
     }
 }
-
