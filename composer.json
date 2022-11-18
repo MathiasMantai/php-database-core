@@ -1,5 +1,5 @@
 {
-    "name": "phptools/php-databasecore",
+    "name": "phptools/php-database-core",
     "type": "library",
     "description": "A simple php query builder",
     "license": "GPL-3.0-or-later",
