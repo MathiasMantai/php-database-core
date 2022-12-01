@@ -146,7 +146,7 @@ class DbCore {
         // var_dump($this->pdo);
         try {
             $sql = $this->pdo->prepare($query);
-            $sql->execute($values);
+            $res = $sql->execute($values);
         }
         catch(PDOException $e) {
             $this->errorLog->logError($e->getMessage());
