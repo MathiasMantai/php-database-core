@@ -92,7 +92,7 @@ class DbCore {
      * @param string $password password
      * @return bool true = database exists ; false = database does not exist
      */
-    public static function dbExists(string $dbName, string $host, string $user, string $password) {
+    public static function dbExists(string $dbName, string $host, string $user, string $password): bool {
         $query = "SHOW DATABASES LIKE ?";
         $tmpPDO = new PDO('mysql:dbname=;host='. $host .';', $user, $password);
         $sql = $tmpPDO->prepare($query);
@@ -106,7 +106,7 @@ class DbCore {
      * @param array $bindArray
      * @return array
      */
-    function select(string $query, string $mode, array $bindArray): array {
+    function select(string $query, string $mode, array $bindArray = []): array {
         $sql = $this->pdo->prepare($query);
         $sql->execute($bindArray);
         switch($mode) {
