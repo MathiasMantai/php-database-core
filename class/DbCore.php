@@ -136,36 +136,30 @@ class DbCore {
      * @param array $values
      * @return bool
      */
-    function insert(string $table,array $columns,array $values): bool {
-        $res;
-        $bindParameters = implode(',', array_fill(0, count($values, '?')));
-        $query = 'INSERT INTO '.$table.' ';
-        $query .= '( ';
-        for($i = 0; $i < count($columns); $i++) {
-            $query .= '?';
-            if($i < count($columns)-1) {
-                $query .= ', ';
-            }
-        }
-        $query .= ' ) VALUES ( ';
-        for($i = 0; $i < count($values); $i++) {
-            $query .= $values[$i];
-            if($i < count($values)-1) {
-                $query .= ', ';
-            }
-        }
-        $query .= ' )';
-        // print $query;
-        // var_dump($this->pdo);
-        try {
-            $sql = $this->pdo->prepare($query);
-            $res = $sql->execute($values);
-        }
-        catch(PDOException $e) {
-            $this->errorLog->logError($e->getMessage());
-        }
+    public function insert(string $table,array $columns,array $values):bool {
 
+        $res;
+
+        if(count($columns) != count($values)) return -1;
+
+        //build the query
+        $colString = implode(",", $columns);
+        $bindString = implode(",",array_fill(0, count($values),"?"));
+
+
+        $query = "INSERT INTO " . $table . "({$colString}) VALUES ({$bindString})";
+
+        $this->begin();
+
+        $sql = $this->pdo->prepare($query);
+        $res = $sql->execute($values);
+
+        if($res) {
+            $this->commit();
+        }
+        else $this->rollback();
         return $res;
+        
     }
 
     /**
