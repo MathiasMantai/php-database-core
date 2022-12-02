@@ -100,6 +100,19 @@ class DbCore {
         return $res;
     }
 
+    public function begin() {
+        $this->pdo->beginTransaction();
+    }
+
+    public function commit() {
+        $this->pdo->commit();
+    }
+
+    public function rollback() {
+        $this->pdo->rollBack();
+    }
+
+
     /**
      * @param string $query
      * @param string $mode
