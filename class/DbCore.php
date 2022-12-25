@@ -117,9 +117,9 @@ class DbCore {
      * @param string $query
      * @param string $mode
      * @param array $bindArray
-     * @return array
+     * @return array|bool
      */
-    function select(string $query, string $mode, array $bindArray = []): array {
+    function select(string $query, string $mode, array $bindArray = []): array|bool {
         $sql = $this->pdo->prepare($query);
         $sql->execute($bindArray);
         switch($mode) {
