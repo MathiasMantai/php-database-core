@@ -1,11 +1,11 @@
 {
-    "name": "phptools/php-database-core",
+    "name": "mathiasmantai/database-core",
     "type": "library",
-    "description": "A simple php query builder",
+    "description": "A Database object for php",
     "license": "GPL-3.0-or-later",
     "autoload": {
         "psr-4": {
-            "DbCore\\": "class/"
+            "Mathiasmantai\\DbCore\\": "class/"
         }
     },
     "require": {

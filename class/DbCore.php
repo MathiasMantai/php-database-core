@@ -1,9 +1,9 @@
 <?php
 
 
-namespace DbCore;
+namespace Mathiasmantai\DbCore;
 use DbCore\ErrorLog;
-use DbCore\Csrf;
+
 use PDO;
 
 
