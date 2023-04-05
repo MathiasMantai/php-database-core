@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Mathiasmantai\DbCore;
+namespace Mmantai\DbCore;
 use DbCore\ErrorLog;
 
 use PDO;

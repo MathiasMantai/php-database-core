@@ -1,11 +1,11 @@
 {
-    "name": "mathiasmantai/database-core",
+    "name": "mmantai/database-core",
     "type": "library",
     "description": "A Database object for php",
     "license": "GPL-3.0-or-later",
     "autoload": {
         "psr-4": {
-            "Mathiasmantai\\DbCore\\": "class/"
+            "Mmantai\\DbCore\\": "class/"
         }
     },
     "require": {

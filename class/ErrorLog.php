@@ -1,6 +1,6 @@
 <?php
 
-namespace Mathiasmantai\DbCore;
+namespace Mmantai\DbCore;
 
 class ErrorLog {
     function __construct() {
