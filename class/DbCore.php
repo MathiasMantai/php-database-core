@@ -28,19 +28,23 @@ abstract class DbCore
     /**
      * @return void
      */
-    public function closeConnection(): void {
+    public function closeConnection(): void 
+    {
         $this->pdo = null;
     }
 
-    public function begin() {
+    public function begin() 
+    {
         $this->pdo->beginTransaction();
     }
 
-    public function commit() {
+    public function commit() 
+    {
         $this->pdo->commit();
     }
 
-    public function rollback() {
+    public function rollback() 
+    {
         $this->pdo->rollBack();
     }
 }

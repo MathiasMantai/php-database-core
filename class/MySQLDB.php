@@ -8,7 +8,9 @@ use Mmantai\DbCore\ErrorLog;
 use Mmantai\QueryBuilder\QueryBuilderFactory;
 use PDO;
 
-
+/**
+ * class for mysql databases using PDO
+ */
 class MySQLDB extends DbCore 
 {
 
@@ -30,20 +32,57 @@ class MySQLDB extends DbCore
         }
     }
 
+    /**
+     * method for building and executing select statements
+     * @param array $fields     table fields to select
+     * @param string $table     table to select from
+     */
+    public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), string $order = "", array $groupBy = array())
+    {
+        $this->queryBuilder->select($fields);
+        $this->queryBuilder->from($table, $tableAlias);
+
+        //joins
+
+        //where
+
+        //group by
+        $this->queryBuilder->groupBy($groupBy);
+
+        //order by
+        $this->queryBuilder->orderBy($orderBy, $order);
+        
+        
+        try
+        {
+            $sql = $this->pdo->prepare($this->queryBuilder->getQuery());
+            $sql->execute();
+            $res = $sql->fetch(PDO::FETCH_ASSOC);
+            return $res;
+        }
+        catch(PDOException $e)
+        {
+            die($e->getMessage());
+        }
+    }
+
 
     /**
      * @param string $dbName
      * @return bool
      */
-    public static function initDB(string $dbName, string $host, string $user, string $password): bool {
+    public static function initDB(string $dbName, string $host, string $user, string $password): bool 
+    {
         $res;
-        try {
+        try 
+        {
             $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $password);
             $dbName = filter_var($dbName);
             $sql_tmp = $tmpConn->prepare("CREATE DATABASE IF NOT EXISTS $dbName");
             $res = $sql_tmp->execute();
         }
-        catch(PDOException $e) {
+        catch(PDOException $e) 
+        {
             die("Error creating database");
         }
 
