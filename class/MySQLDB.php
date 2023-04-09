@@ -36,6 +36,9 @@ class MySQLDB extends DbCore
      * method for building and executing select statements
      * @param array $fields     table fields to select
      * @param string $table     table to select from
+     * @param string $tableAlias
+     * @param array $join
+     * @param array $where      where statement. structure should be [[column, operator, value], ["AND", column, operator, value]]
      */
     public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), string $order = "", array $groupBy = array())
     {
@@ -45,6 +48,16 @@ class MySQLDB extends DbCore
         //joins
 
         //where
+        $this->queryBuilder->where(...$where[0]);
+        //rest of where
+        $cnt = count($where);
+        for($i = 1; $i < $cnt; $i++)
+        {
+            if(strtoupper($where[$i]) == "AND")
+                $this->queryBuilder->and(...$where[$i]);
+            else if(strtoupper($where[$i]) == "OR")
+                $this->queryBuilder->or(...$where[$i]);
+        }
 
         //group by
         $this->queryBuilder->groupBy($groupBy);
@@ -55,6 +68,7 @@ class MySQLDB extends DbCore
         
         try
         {
+            print $this->queryBuilder->getQuery();
             $sql = $this->pdo->prepare($this->queryBuilder->getQuery());
             $sql->execute();
             $res = $sql->fetch(PDO::FETCH_ASSOC);
