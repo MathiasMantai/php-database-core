@@ -11,7 +11,6 @@ use PDOException;
 
 class MySQLDB extends DbCore 
 {
-
     private PDO $pdo;
 
     private string $db;
@@ -43,10 +42,35 @@ class MySQLDB extends DbCore
 
     public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), array $order = array(), array $groupBy = array())
     {
+        $res = [
+            "result" => ""
+        ];
+
         $this->queryBuilder->select($fields);
         $this->queryBuilder->from($table, $tableAlias);
 
         //joins
+        if(count($join) > 0)
+        {
+            foreach($join as $j)
+            {
+                $joinType = $j[0];
+                array_shift($j);
+                switch($joinType)
+                {
+                    case "INNER JOIN": $this->queryBuilder->innerJoin(...$j);
+                    break;
+                    case "LEFT JOIN": $this->queryBuilder->leftJoin(...$j);
+                    break;
+                    case "RIGHT JOIN": $this->queryBuilder->rightJoin(...$j);
+                    break;
+                    case "FULL JOIN": $this->queryBuilder->fullJoin(...$j);
+                    break;
+                    case "NARURAL JOIN": $this->queryBuilder->naturalJoin(...$j);
+                    break;
+                }
+            }
+        }
 
         //where
         $this->queryBuilder->where(...$where[0]);
@@ -77,21 +101,26 @@ class MySQLDB extends DbCore
         try
         {
             $query = $this->queryBuilder->get();
-            print $query;
+            //print $query;
             $sql = $this->pdo->prepare($query);
             $sql->execute();
-            $res = $sql->fetch(PDO::FETCH_ASSOC);
-            return $res;
+            $res["result"] = $sql->fetch(PDO::FETCH_ASSOC);
+
         }
         catch(PDOException $e)
         {
-            die($e->getMessage());
+            $res["result"] = $e->getMessage();
         }
+
+        return $res;
     }
 
-    public static function initDB(string $dbName, string $host, string $user, string $pw): bool 
+    public static function initDB(string $dbName, string $host, string $user, string $pw): array 
     {
-        $res;
+        $res = [
+            "result" => ""
+        ];
+
         try 
         {
             $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $pw);
@@ -115,9 +144,12 @@ class MySQLDB extends DbCore
         $this->pdo = null;
     }
 
-    public static function initTables(string $dir): bool 
+    public static function initTables(string $dir): array 
     {
-        $res;
+        $res = [
+            "result" => ""
+        ];
+        
         $tableFiles = glob($dir . '*.sql');
         try {
             $tmp = new PDO('mysql:dbname='. self::$db .';host='. self::$host .';', self::$user, self::$pw);
