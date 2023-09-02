@@ -4,43 +4,44 @@
 namespace Mmantai\DbCore;
 
 use Mmantai\DbCore\DbCore;
-use Mmantai\DbCore\ErrorLog;
-use Mmantai\QueryBuilder\QueryBuilderFactory;
+use MMantai\QueryBuilder\MySQLQueryBuilder;
+use MMantai\QueryBuilder\QueryBuilderFactory;
 use PDO;
+use PDOException;
 
-/**
- * class for mysql databases using PDO
- */
 class MySQLDB extends DbCore 
 {
 
-    function __construct(string $database, string $host, string $user, string $password) 
+    private PDO $pdo;
+
+    private string $db;
+
+    private string $host;
+
+    private string $user;
+
+    private string $pw;
+
+    private MySQLQueryBuilder $queryBuilder;
+
+    function __construct(string $db, string $host, string $user, string $pw) 
     {
-        $this->database = $database;
+        $this->db = $db;
         $this->host = $host;
         $this->user = $user;
-        $this->password = $password;
-        $this->errorLog = new ErrorLog();
-        $this->queryBuilder = QueryBuilderFactory::createQueryBuilder('mysql');
+        $this->pw = $pw;
+        $this->queryBuilder = QueryBuilderFactory::create("mysql");
         
         try {
-            $this->pdo = new PDO('mysql:dbname='.$this->database.';host='.$this->host.';', $this->user, $this->password);
+            $this->pdo = new PDO('mysql:dbname='.$this->db.';host='.$this->host.';', $this->user, $this->pw);
             // var_dump($this->pdo);
         }
         catch(PDOException $e) {
-            $this->errorLog->logError($e->getMessage());
+            //error logging
         }
     }
 
-    /**
-     * method for building and executing select statements
-     * @param array $fields     table fields to select
-     * @param string $table     table to select from
-     * @param string $tableAlias
-     * @param array $join
-     * @param array $where      where statement. structure should be [[column, operator, value], ["AND", column, operator, value]]
-     */
-    public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), string $order = "", array $groupBy = array())
+    public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), array $order = array(), array $groupBy = array())
     {
         $this->queryBuilder->select($fields);
         $this->queryBuilder->from($table, $tableAlias);
@@ -59,17 +60,25 @@ class MySQLDB extends DbCore
                 $this->queryBuilder->or(...$where[$i]);
         }
 
-        //group by
-        $this->queryBuilder->groupBy($groupBy);
+        if(count($groupBy) > 0)
+        {
+            $this->queryBuilder->groupBy($groupBy);
+        }
 
-        //order by
-        $this->queryBuilder->orderBy($orderBy, $order);
-        
+        if(count($orderBy) != count($order))
+        {
+            //throw error
+        }
+        else if(count($orderBy) > 0 && count($order) > 0)
+        {
+            $this->queryBuilder->orderBy($orderBy, $order);
+        }
         
         try
         {
-            print $this->queryBuilder->getQuery();
-            $sql = $this->pdo->prepare($this->queryBuilder->getQuery());
+            $query = $this->queryBuilder->get();
+            print $query;
+            $sql = $this->pdo->prepare($query);
             $sql->execute();
             $res = $sql->fetch(PDO::FETCH_ASSOC);
             return $res;
@@ -80,24 +89,19 @@ class MySQLDB extends DbCore
         }
     }
 
-
-    /**
-     * @param string $dbName
-     * @return bool
-     */
-    public static function initDB(string $dbName, string $host, string $user, string $password): bool 
+    public static function initDB(string $dbName, string $host, string $user, string $pw): bool 
     {
         $res;
         try 
         {
-            $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $password);
+            $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $pw);
             $dbName = filter_var($dbName);
-            $sql_tmp = $tmpConn->prepare("CREATE DATABASE IF NOT EXISTS $dbName");
+            $sql_tmp = $tmpConn->prepare("CREATE db IF NOT EXISTS $dbName");
             $res = $sql_tmp->execute();
         }
         catch(PDOException $e) 
         {
-            die("Error creating database");
+            die("Error creating db");
         }
 
         return $res;
@@ -106,19 +110,17 @@ class MySQLDB extends DbCore
     /**
      * @return void
      */
-    function closeConnection(): void {
+    function closeConnection(): void 
+    {
         $this->pdo = null;
     }
 
-    /**
-     * @param string $dir
-     * @return bool
-     */
-    public static function initTables(string $dir): bool  {
+    public static function initTables(string $dir): bool 
+    {
         $res;
         $tableFiles = glob($dir . '*.sql');
         try {
-            $tmp = new PDO('mysql:dbname='. $this->database .';host='. $this->host .';', $this->user, $this->password);
+            $tmp = new PDO('mysql:dbname='. self::$db .';host='. self::$host .';', self::$user, self::$pw);
             for($i = 0; $i < count($tableFiles); $i++) {
                 $fileData = file_get_contents($tableFiles[$i]);
                 $sql = $tmp->prepare($fileData);
@@ -132,30 +134,40 @@ class MySQLDB extends DbCore
         return $res;
     }
 
-    /**
-     * @param string $dbName name of the database to check
-     * @param string $host host adress
-     * @param string $user username
-     * @param string $password password
-     * @return bool true = database exists ; false = database does not exist
-     */
-    public static function dbExists(string $dbName, string $host, string $user, string $password): bool {
+    public static function dbExists(string $dbName, string $host, string $user, string $pw): array
+    {
+        $res = [
+            "result" => "success"
+        ];
+
         $query = "SHOW DATABASES LIKE ?";
-        $tmpPDO = new PDO('mysql:dbname=;host='. $host .';', $user, $password);
-        $sql = $tmpPDO->prepare($query);
-        $res = $sql->execute([$dbName]);
+
+        try 
+        {
+            $tmpPDO = new PDO('mysql:dbname=;host='. $host .';', $user, $pw);
+            $sql = $tmpPDO->prepare($query);
+            $sql->execute([$dbName]);
+        }
+        catch(PDOException $e)
+        {
+            $res["result"] = $e->getMessage();
+        }
+
         return $res;
     }
 
-    public function begin() {
+    public function begin() 
+    {
         $this->pdo->beginTransaction();
     }
 
-    public function commit() {
+    public function commit() 
+    {
         $this->pdo->commit();
     }
 
-    public function rollback() {
+    public function rollback() 
+    {
         $this->pdo->rollBack();
     }
 }

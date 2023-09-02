@@ -8,16 +8,10 @@
             "Mmantai\\DbCore\\": "class/"
         }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/MathiasMantai/php-querybuilder.git"
-        }
-    ],
     "require": {
-        "mmantai/query-builder": "dev-master",
         "php": ">=5.3.6",
         "ext-pdo": "*",
-        "ext-pdo_mysql": "*"
+        "ext-pdo_mysql": "*",
+        "mmantai/query-builder": "^0.0.1"
     }
 }
