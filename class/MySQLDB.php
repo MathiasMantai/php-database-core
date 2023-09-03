@@ -9,7 +9,7 @@ use MMantai\QueryBuilder\QueryBuilderFactory;
 use PDO;
 use PDOException;
 
-class MySQLDB extends DbCore 
+class MySQLDB
 {
     private PDO $pdo;
 
