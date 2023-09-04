@@ -11,7 +11,7 @@ use PDOException;
 
 class MySQLDB
 {
-    private PDO $pdo;
+    private PDO|null $pdo;
 
     private string $db;
 
@@ -40,81 +40,6 @@ class MySQLDB
         }
     }
 
-    public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), array $order = array(), array $groupBy = array())
-    {
-        $res = [
-            "result" => ""
-        ];
-
-        $this->queryBuilder->select($fields);
-        $this->queryBuilder->from($table, $tableAlias);
-
-        //joins
-        if(count($join) > 0)
-        {
-            foreach($join as $j)
-            {
-                $joinType = $j[0];
-                array_shift($j);
-                switch($joinType)
-                {
-                    case "INNER JOIN": $this->queryBuilder->innerJoin(...$j);
-                    break;
-                    case "LEFT JOIN": $this->queryBuilder->leftJoin(...$j);
-                    break;
-                    case "RIGHT JOIN": $this->queryBuilder->rightJoin(...$j);
-                    break;
-                    case "FULL JOIN": $this->queryBuilder->fullJoin(...$j);
-                    break;
-                    case "NARURAL JOIN": $this->queryBuilder->naturalJoin(...$j);
-                    break;
-                }
-            }
-        }
-
-        //where
-        $this->queryBuilder->where(...$where[0]);
-        //rest of where
-        $cnt = count($where);
-        for($i = 1; $i < $cnt; $i++)
-        {
-            if(strtoupper($where[$i]) == "AND")
-                $this->queryBuilder->and(...$where[$i]);
-            else if(strtoupper($where[$i]) == "OR")
-                $this->queryBuilder->or(...$where[$i]);
-        }
-
-        if(count($groupBy) > 0)
-        {
-            $this->queryBuilder->groupBy($groupBy);
-        }
-
-        if(count($orderBy) != count($order))
-        {
-            //throw error
-        }
-        else if(count($orderBy) > 0 && count($order) > 0)
-        {
-            $this->queryBuilder->orderBy($orderBy, $order);
-        }
-        
-        try
-        {
-            $query = $this->queryBuilder->get();
-            //print $query;
-            $sql = $this->pdo->prepare($query);
-            $sql->execute();
-            $res["result"] = $sql->fetch(PDO::FETCH_ASSOC);
-
-        }
-        catch(PDOException $e)
-        {
-            $res["result"] = $e->getMessage();
-        }
-
-        return $res;
-    }
-
     public static function initDB(string $dbName, string $host, string $user, string $pw): array 
     {
         $res = [
@@ -126,7 +51,7 @@ class MySQLDB
             $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $pw);
             $dbName = filter_var($dbName);
             $sql_tmp = $tmpConn->prepare("CREATE db IF NOT EXISTS $dbName");
-            $res = $sql_tmp->execute();
+            $res["result"] = $sql_tmp->execute();
         }
         catch(PDOException $e) 
         {
@@ -201,5 +126,80 @@ class MySQLDB
     public function rollback() 
     {
         $this->pdo->rollBack();
+    }
+
+    public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), array $order = array(), array $groupBy = array())
+    {
+        $res = [
+            "result" => ""
+        ];
+
+        $this->queryBuilder->select($fields);
+        $this->queryBuilder->from($table, $tableAlias);
+
+        //joins
+        if(count($join) > 0)
+        {
+            foreach($join as $j)
+            {
+                $joinType = $j[0];
+                array_shift($j);
+                switch($joinType)
+                {
+                    case "INNER JOIN": $this->queryBuilder->innerJoin(...$j);
+                    break;
+                    case "LEFT JOIN": $this->queryBuilder->leftJoin(...$j);
+                    break;
+                    case "RIGHT JOIN": $this->queryBuilder->rightJoin(...$j);
+                    break;
+                    case "FULL JOIN": $this->queryBuilder->fullJoin(...$j);
+                    break;
+                    case "NARURAL JOIN": $this->queryBuilder->naturalJoin(...$j);
+                    break;
+                }
+            }
+        }
+
+        //where
+        $this->queryBuilder->where(...$where[0]);
+        //rest of where
+        $cnt = count($where);
+        for($i = 1; $i < $cnt; $i++)
+        {
+            if(strtoupper($where[$i]) == "AND")
+                $this->queryBuilder->and(...$where[$i]);
+            else if(strtoupper($where[$i]) == "OR")
+                $this->queryBuilder->or(...$where[$i]);
+        }
+
+        if(count($groupBy) > 0)
+        {
+            $this->queryBuilder->groupBy($groupBy);
+        }
+
+        if(count($orderBy) != count($order))
+        {
+            //throw error
+        }
+        else if(count($orderBy) > 0 && count($order) > 0)
+        {
+            $this->queryBuilder->orderBy($orderBy, $order);
+        }
+        
+        try
+        {
+            $query = $this->queryBuilder->get();
+            print $query;
+            $sql = $this->pdo->prepare($query);
+            $sql->execute();
+            $res["result"] = $sql->fetch(PDO::FETCH_ASSOC);
+
+        }
+        catch(PDOException $e)
+        {
+            $res["result"] = $e->getMessage();
+        }
+
+        return $res;
     }
 }
