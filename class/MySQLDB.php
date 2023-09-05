@@ -3,7 +3,6 @@
 
 namespace Mmantai\DbCore;
 
-use Mmantai\DbCore\DbCore;
 use MMantai\QueryBuilder\MySQLQueryBuilder;
 use MMantai\QueryBuilder\QueryBuilderFactory;
 use PDO;
@@ -230,6 +229,105 @@ class MySQLDB
         {
             $res["result"] = $e->getMessage();
         }
+
+        return $res;
+    }
+
+    public function update(string $table, array $columns, array $values, array $where)
+    {
+        $res = $this->getEmptyResultObject();
+
+        try
+        {
+            $cntC = count($columns); 
+            $cntV = count($values);
+
+            if($cntC != $cntV)
+            {
+                $res["result"] = "Update error: column and value amount does not match";
+                return $res;
+            }
+            else if($cntC == 0)
+            {
+                $res["result"] = "Update error: column array cannot be empty";
+                return $res;
+            }
+            else if($cntV == 0)
+            {
+                $res["result"] = "Update error: value array cannot be empty";
+                return $res;
+            }
+
+            $cnt = count($columns);
+
+            $this->queryBuilder->update($table);
+
+            //set
+            if($cnt > 1)
+            {
+                $this->queryBuilder->setMulti($columns, $this->getPlaceholderArray($cnt));
+            }
+            else 
+            {
+                $this->queryBuilder->set($columns[0], "?");
+            }
+
+
+            //where
+            $cntW = count($where);
+
+            if($cntW > 0)
+            {
+                if(is_array($where[0]))
+                {
+                    $firstW = $where[0];
+                    $this->queryBuilder->where($firstW[0], $firstW[1], "?");
+                    array_push($values, $firstW[2]);
+
+                    array_shift($where);
+
+                    foreach($where as $w)
+                    {
+                        if($w[0] == "AND")
+                        {
+                            $this->queryBuilder->and($w[1], $w[2], "?");
+                            array_push($values, $w[3]);
+                            
+                        }
+                        else if($w[0] == "OR")
+                        {
+                            $this->queryBuilder->or($w[1], $w[2], "?");
+                            array_push($values, $w[3]);
+                        }
+                        else
+                        {
+                            $res["result"] = "Update error: unknown operator found in where array";
+                        }
+                    }
+                }
+                else
+                {
+                    $this->queryBuilder->where($where[0], $where[1], "?");
+                    array_push($values, $where[2]);
+                }
+            }
+
+            $query = $this->queryBuilder->get();
+            $res["query"] = $query;
+            $sql = $this->pdo->prepare($query);
+            $sql->execute($values);
+        }
+        catch(PDOException $e)
+        {
+            $res["result"] = $e->getMessage();
+        }
+
+        return $res;
+    }
+
+    public function delete()
+    {
+        $res = $this->getEmptyResultObject();
 
         return $res;
     }

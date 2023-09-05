@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/MathiasMantai/php-querybuilder.git",
-                "reference": "48d8f919a978a76239079799a8af48ec01c62417"
+                "reference": "63bfa1ef3461d1c4e29cdc6903b838471a32f4f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MathiasMantai/php-querybuilder/zipball/48d8f919a978a76239079799a8af48ec01c62417",
-                "reference": "48d8f919a978a76239079799a8af48ec01c62417",
+                "url": "https://api.github.com/repos/MathiasMantai/php-querybuilder/zipball/63bfa1ef3461d1c4e29cdc6903b838471a32f4f3",
+                "reference": "63bfa1ef3461d1c4e29cdc6903b838471a32f4f3",
                 "shasum": ""
             },
             "require-dev": {
@@ -39,7 +39,7 @@
                 "issues": "https://github.com/MathiasMantai/php-querybuilder/issues",
                 "source": "https://github.com/MathiasMantai/php-querybuilder/tree/master"
             },
-            "time": "2023-09-05T09:56:45+00:00"
+            "time": "2023-09-05T10:52:32+00:00"
         }
     ],
     "packages-dev": [],
