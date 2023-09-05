@@ -325,9 +325,63 @@ class MySQLDB
         return $res;
     }
 
-    public function delete()
+    public function delete(string $table, array $where)
     {
         $res = $this->getEmptyResultObject();
+        
+        $values = [];
+
+        $this->queryBuilder->delete($table);
+
+        try
+        {
+            $cntW = count($where);
+
+            if($cntW > 0)
+            {
+                if(is_array($where[0]))
+                {
+                    $firstW = $where[0];
+                    $this->queryBuilder->where($firstW[0], $firstW[1], "?");
+                    array_push($values, $firstW[2]);
+
+                    array_shift($where);
+
+                    foreach($where as $w)
+                    {
+                        if($w[0] == "AND")
+                        {
+                            $this->queryBuilder->and($w[1], $w[2], "?");
+                            array_push($values, $w[3]);
+                            
+                        }
+                        else if($w[0] == "OR")
+                        {
+                            $this->queryBuilder->or($w[1], $w[2], "?");
+                            array_push($values, $w[3]);
+                        }
+                        else
+                        {
+                            $res["result"] = "Update error: unknown operator found in where array";
+                        }
+                    }
+                }
+                else
+                {
+                    $this->queryBuilder->where($where[0], $where[1], "?");
+                    array_push($values, $where[2]);
+                }
+            }
+
+            $query = $this->queryBuilder->get();
+            $res["query"] = $query;
+            $sql = $this->pdo->prepare($query);
+            $sql->execute($values);
+        }
+        catch(PDOException $e)
+        {
+            $res["result"] = $e->getMessage();
+        }
 
         return $res;
     }
