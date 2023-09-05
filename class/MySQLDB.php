@@ -233,7 +233,7 @@ class MySQLDB
         return $res;
     }
 
-    public function update(string $table, array $columns, array $values, array $where)
+    public function update(string $table, array $columns, array $values, array $where = [])
     {
         $res = $this->getEmptyResultObject();
 
@@ -325,7 +325,7 @@ class MySQLDB
         return $res;
     }
 
-    public function delete(string $table, array $where)
+    public function delete(string $table, array $where = [])
     {
         $res = $this->getEmptyResultObject();
         
