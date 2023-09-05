@@ -40,6 +40,14 @@ class MySQLDB
         }
     }
 
+    public function getEmptyResultObject()
+    {
+        return [
+            "query",
+            "result" => "success"
+        ];
+    }
+
     public static function initDB(string $dbName, string $host, string $user, string $pw): array 
     {
         $res = [
@@ -130,9 +138,7 @@ class MySQLDB
 
     public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), array $order = array(), array $groupBy = array())
     {
-        $res = [
-            "result" => ""
-        ];
+        $res = $this->getEmptyResultObject();
 
         $this->queryBuilder->select($fields);
         $this->queryBuilder->from($table, $tableAlias);
@@ -194,6 +200,31 @@ class MySQLDB
             $sql->execute();
             $res["result"] = $sql->fetch(PDO::FETCH_ASSOC);
 
+        }
+        catch(PDOException $e)
+        {
+            $res["result"] = $e->getMessage();
+        }
+
+        return $res;
+    }
+
+    private function getPlaceholderArray(int $amount)
+    {
+        return array_fill(0, $amount, "?");
+    }
+
+    public function insert(string $table, array $columns, array $values)
+    {
+        $res = $this->getEmptyResultObject();
+
+        try
+        {
+            $valueCnt = count($values);
+            $query = $this->queryBuilder->insert($table, $columns, $this->getPlaceholderArray($valueCnt))->get();
+            $res["query"] = $query;
+            $sql = $this->pdo->prepare($query);
+            $sql->execute($values);
         }
         catch(PDOException $e)
         {
