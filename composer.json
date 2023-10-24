@@ -1,5 +1,6 @@
 {
     "name": "mmantai/database-core",
+    "version": "0.0.1",
     "type": "library",
     "description": "A Database object for php",
     "license": "GPL-3.0-or-later",
