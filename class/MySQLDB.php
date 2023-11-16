@@ -3,8 +3,8 @@
 
 namespace Mmantai\DbCore;
 
-use MMantai\QueryBuilder\MySQLQueryBuilder;
-use MMantai\QueryBuilder\QueryBuilderFactory;
+use Mmantai\QueryBuilder\MySQLQueryBuilder;
+use Mmantai\QueryBuilder\QueryBuilderFactory;
 use PDO;
 use PDOException;
 
