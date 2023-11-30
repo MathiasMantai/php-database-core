@@ -172,9 +172,9 @@ class MySQLDB
         for($i = 1; $i < $cnt; $i++)
         {
             if(strtoupper($where[$i][0]) == "AND")
-                $this->queryBuilder->and(...$where[$i]);
+                $this->queryBuilder->and(...array_slice($where[$i], 1, 3));
             else if(strtoupper($where[$i][0]) == "OR")
-                $this->queryBuilder->or(...$where[$i]);
+                $this->queryBuilder->or(...array_slice($where[$i], 1, 3));
         }
 
         if(count($groupBy) > 0)
