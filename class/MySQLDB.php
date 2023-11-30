@@ -171,9 +171,9 @@ class MySQLDB
         $cnt = count($where);
         for($i = 1; $i < $cnt; $i++)
         {
-            if(strtoupper($where[$i]) == "AND")
+            if(strtoupper($where[$i][0]) == "AND")
                 $this->queryBuilder->and(...$where[$i]);
-            else if(strtoupper($where[$i]) == "OR")
+            else if(strtoupper($where[$i][0]) == "OR")
                 $this->queryBuilder->or(...$where[$i]);
         }
 
@@ -202,7 +202,7 @@ class MySQLDB
         }
         catch(PDOException $e)
         {
-            $res["result"] = $e->getMessage();
+            return false;
         }
 
         return $res;
@@ -377,6 +377,29 @@ class MySQLDB
             $res["query"] = $query;
             $sql = $this->pdo->prepare($query);
             $sql->execute($values);
+        }
+        catch(PDOException $e)
+        {
+            $res["result"] = $e->getMessage();
+        }
+
+        return $res;
+    }
+
+    public function query(string $query, array $values = []): array
+    {
+        $res = $this->getEmptyResultObject();
+
+        try
+        {
+            $res["query"] = $query;
+            $sql = $this->pdo->prepare($query);
+            $sql->execute($values);
+
+            if(strpos(strtoupper($query), "SELECT") !== false)
+            {
+                $res["result"] = $sql->fetchAll(PDO::FETCH_ASSOC);
+            }
         }
         catch(PDOException $e)
         {
