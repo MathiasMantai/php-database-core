@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e93df24afbe6b3c0b92f2a423220d720",
+    "content-hash": "00ccd96871c183e18eadeb010830b529",
     "packages": [
         {
             "name": "mmantai/query-builder",
-            "version": "v0.0.2",
+            "version": "v0.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MathiasMantai/php-querybuilder.git",
-                "reference": "63bfa1ef3461d1c4e29cdc6903b838471a32f4f3"
+                "reference": "76ad98312f906a9a4f0960f3c8f96fad81fc1c0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MathiasMantai/php-querybuilder/zipball/63bfa1ef3461d1c4e29cdc6903b838471a32f4f3",
-                "reference": "63bfa1ef3461d1c4e29cdc6903b838471a32f4f3",
+                "url": "https://api.github.com/repos/MathiasMantai/php-querybuilder/zipball/76ad98312f906a9a4f0960f3c8f96fad81fc1c0b",
+                "reference": "76ad98312f906a9a4f0960f3c8f96fad81fc1c0b",
                 "shasum": ""
             },
             "require-dev": {
@@ -26,7 +26,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "MMantai\\QueryBuilder\\": "class/"
+                    "Mmantai\\QueryBuilder\\": "class/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -36,9 +36,9 @@
             "description": "A simple method based query builder",
             "support": {
                 "issues": "https://github.com/MathiasMantai/php-querybuilder/issues",
-                "source": "https://github.com/MathiasMantai/php-querybuilder/tree/v0.0.2"
+                "source": "https://github.com/MathiasMantai/php-querybuilder/tree/v0.0.3"
             },
-            "time": "2023-09-05T10:52:32+00:00"
+            "time": "2023-12-22T10:01:56+00:00"
         }
     ],
     "packages-dev": [],
@@ -48,7 +48,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3.6",
+        "php": ">=8.1.27",
         "ext-pdo": "*",
         "ext-pdo_mysql": "*"
     },

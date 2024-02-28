@@ -2,12 +2,12 @@
 
 namespace Mmantai\DbCore;
 
-use Mmantai\QueryBuilder\MySQLQueryBuilder;
+use Mmantai\QueryBuilder\PostgreSQLQueryBuilder;
 use Mmantai\QueryBuilder\QueryBuilderFactory;
 use PDO;
 use PDOException;
 
-class MySQLDB
+class PgSQLDB
 {
     private PDO|null $pdo;
 
@@ -19,22 +19,28 @@ class MySQLDB
 
     private string $pw;
 
-    private MySQLQueryBuilder $queryBuilder;
+    private string $port;
 
-    function __construct(string $db, string $host, string $user, string $pw) 
+    private PostgreSQLQueryBuilder $queryBuilder;
+
+    function __construct(string $db, string $host, string $user, string $pw, string $port = '5432') 
     {
         $this->db = $db;
         $this->host = $host;
         $this->user = $user;
         $this->pw = $pw;
-        $this->queryBuilder = QueryBuilderFactory::create("mysql");
+        $this->port = $port;
+        $this->queryBuilder = QueryBuilderFactory::create("pgsql");
         
-        try {
-            $this->pdo = new PDO('mysql:dbname='.$this->db.';host='.$this->host.';', $this->user, $this->pw);
+        try 
+        {
+            $this->pdo = new PDO('pgsql:dbname='.$this->db.';host='.$this->host.';', $this->user, $this->pw);
             // var_dump($this->pdo);
         }
-        catch(PDOException $e) {
+        catch(PDOException $e) 
+        {
             //error logging
+            print $e->getMessage();
         }
     }
 
@@ -46,7 +52,7 @@ class MySQLDB
         ];
     }
 
-    public static function initDB(string $dbName, string $host, string $user, string $pw): array 
+    public static function initDB(string $dbName, string $host, string $user, string $pw, string $port = '5432'): array 
     {
         $res = [
             "result" => ""
@@ -54,7 +60,7 @@ class MySQLDB
 
         try 
         {
-            $tmpConn = new PDO('mysql:dbname=;host='.$host.';', $user, $pw);
+            $tmpConn = new PDO('pgsql:dbname=;host='.$host.';', $user, $pw);
             $dbName = filter_var($dbName);
             $sql_tmp = $tmpConn->prepare("CREATE db IF NOT EXISTS $dbName");
             $res["result"] = $sql_tmp->execute();
@@ -83,7 +89,7 @@ class MySQLDB
         
         $tableFiles = glob($dir . '*.sql');
         try {
-            $tmp = new PDO('mysql:dbname='. self::$db .';host='. self::$host .';', self::$user, self::$pw);
+            $tmp = new PDO('pgsql:dbname='. self::$db .';host='. self::$host . ';port=' . self::$port .';user=' . self::$user . ';password=' . self::$pw);
             for($i = 0; $i < count($tableFiles); $i++) {
                 $fileData = file_get_contents($tableFiles[$i]);
                 $sql = $tmp->prepare($fileData);
@@ -107,7 +113,7 @@ class MySQLDB
 
         try 
         {
-            $tmpPDO = new PDO('mysql:dbname=;host='. $host .';', $user, $pw);
+            $tmpPDO = new PDO('pgsql:dbname=;host='. $host .';', $user, $pw);
             $sql = $tmpPDO->prepare($query);
             $sql->execute([$dbName]);
         }
@@ -134,62 +140,40 @@ class MySQLDB
         $this->pdo->rollBack();
     }
 
-    public function select(array $fields, string $table, string $tableAlias = "", array $join = array(), array $where = array(), array $orderBy = array(), array $order = array(), array $groupBy = array())
+    public function select(array $qd): int|bool|array
     {
         $res = $this->getEmptyResultObject();
 
-        $this->queryBuilder->select($fields);
+        //getting fields
+        $fields     = $qd["fields"] ?? "";
+        $table      = $qd["table"] ?? "";
+        $tableAlias = $qd["tableAlias"] ?? "";
+        $where      = $qd["where"] ?? "";
+
+
+        //checking for errors
+        if($fields == "" || $table == "")
+        {
+            return -1;
+        }
+
+        //build query
+        if(strtoupper($qd["fields"]) == 'ALL' || $qd["fields"] == '*')
+        {
+            $this->queryBuilder->selectAll();
+        }
+        else if(count($qd["fields"]) >= 1)
+        {
+            $this->queryBuilder->select($fields);
+        }
+
         $this->queryBuilder->from($table, $tableAlias);
 
-        //joins
-        if(count($join) > 0)
+        if($where != "")
         {
-            foreach($join as $j)
-            {
-                $joinType = $j[0];
-                array_shift($j);
-                switch($joinType)
-                {
-                    case "INNER JOIN": $this->queryBuilder->innerJoin(...$j);
-                    break;
-                    case "LEFT JOIN": $this->queryBuilder->leftJoin(...$j);
-                    break;
-                    case "RIGHT JOIN": $this->queryBuilder->rightJoin(...$j);
-                    break;
-                    case "FULL JOIN": $this->queryBuilder->fullJoin(...$j);
-                    break;
-                    case "NARURAL JOIN": $this->queryBuilder->naturalJoin(...$j);
-                    break;
-                }
-            }
+            $this->queryBuilder->where($where);
         }
 
-        //where
-        $this->queryBuilder->where(...$where[0]);
-        //rest of where
-        $cnt = count($where);
-        for($i = 1; $i < $cnt; $i++)
-        {
-            if(strtoupper($where[$i][0]) == "AND")
-                $this->queryBuilder->and(...array_slice($where[$i], 1, 3));
-            else if(strtoupper($where[$i][0]) == "OR")
-                $this->queryBuilder->or(...array_slice($where[$i], 1, 3));
-        }
-
-        if(count($groupBy) > 0)
-        {
-            $this->queryBuilder->groupBy($groupBy);
-        }
-
-        if(count($orderBy) != count($order))
-        {
-            //throw error
-        }
-        else if(count($orderBy) > 0 && count($order) > 0)
-        {
-            $this->queryBuilder->orderBy($orderBy, $order);
-        }
-        
         try
         {
             $query = $this->queryBuilder->get();
